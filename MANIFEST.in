@@ -1,0 +1,5 @@
+recursive-include mddocs *.py
+include setup.py
+include LICENSE.md
+include README.md
+include MANIFEST

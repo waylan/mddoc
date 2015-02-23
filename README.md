@@ -100,6 +100,12 @@ on potential future development:
     I expect this includes creating some sort of mock modules/classes/functions with
     doc strings that the tests can be run against.
 
+    As an aside, the existing implementation simply sudclasses pydoc, removes some
+    unneeded features and alters object nesting and object titles to fix Markdown's
+    syntax. It was suprising how quickly I got it working. ALthough, I'm sure there 
+    are multiple edge cases I didn't account for. Comprehensive tests will likely
+    reveal all sorts of issues.
+
 *   The format and syntax of the DocTag is not set in stone at this point. I'm not
     sure I even like it. I was inclined to go with curly brackets (`{}`), but I know
     that a number of poeple run their Markdown through Django or Jinga template
@@ -125,19 +131,19 @@ on potential future development:
     As a preprocessor is used, the Markdown text is simply inserted into the source
     document and then the entire document (with the newly inserted parts) is parsed and
     converted to HTML. We could take a few different approaches instead:
-    
+
     1. A templating system could be used allowing the user to more easily adapt the
        output to their specific theming needs. However, this would require that
        already converted HTML would need to be inserted into the document; probably
        by a postprocessor. In this scenario, the regex would look for
        `<p>[% object.name %]</p>` and swap that out.
-    
+
     2. A second alternative would be to use a blockprocessor and custom build the
        HTML using `etree` right in the code. The Markdown doc strings could be parsed
        recursively and inserted as children in the tree. While this gives total 
        control and feels more in line with the spirit of the Markdown Extension API,
        it becomes difficult/impossible for users to customize the resulting markup.
-    
+
     Both of the above paths would allow for the inserted excerpts to be wrapped in
     some way (possibly by a `<div>` or `<section>`). As the output includes headers
     which may not fit into the hierarchy of the rest of the page, this probably makes
@@ -145,7 +151,7 @@ on potential future development:
     start over at `<h1>`. As long as the sections are given a reasonable styling hook,
     themes can dial down the headers styling to match the hierarchy of the entire page, 
     etc.
-    
+
     Either way, my inclination is to look at Sphinx's markup and possibly copy it so
     that Sphinx CSS could be used out-of-the-box for styling purposes. That said,
     the Markdown parts of the doc strings may not translate so well as we don't have
@@ -155,14 +161,21 @@ on potential future development:
     But if we do our own thing, I think (1) makes more sense to give users the 
     flexability to change the output to fit their needs.
 
+    Either option would probably need to complete revamp of the doc string extracting 
+    code. The existing method relies heavily on Pydoc's text based method (used for
+    displaying documentation on the command line as plain text). That works good for
+    building a Markdown document which still needs parsered to HTML, but not so well
+    for building HTML. Pydoc's own HTML method is much more complex (and not so easily
+    portable).
+
 *   Or we could completely ignore the previous point and simpley improve the existing
     method. A few things would need to happen:
 
     * The markup inserted by the preprocessor needs to be broken up and integrated 
     into the list of lines so the rest of the preprocessors can operate on it properly.
-    
+
     * The Markdown pulled from the doc strings needs to have whitespace normalization.
-    
+
     * An option could be added to the DocTag to allow the document author to define the
     lowest level header so the output fits into the document's hierarchy. Not sure
     what this would look like. Not sure I like `[% object.name 3 %]`. Maybe 

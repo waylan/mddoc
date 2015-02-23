@@ -110,7 +110,7 @@ on potential future development:
     nonsupporting Markdown parsers unaffected in the current format and won't confuse
     browers in their raw state in an HTML document.
 
-    I went with percentage signs (`[% ... %]`) which is reminisant of Django/Jinga's
+    I went with percent signs (`[% ... %]`) which is reminisant of Django/Jinga's
     block tags (`{% ... %}`). I could have went with double square brackets 
     (`[[ ... ]]`), but that is already used by the WikiLinks Extension, and is more
     akin to Django/Jinga's tags (`{{ ... }}`), which are not block level. I wanted to 
@@ -121,7 +121,7 @@ on potential future development:
     adjusted to better accommodate such considerations.
 
     There are a few possible ways to address that. Currently, the title is wrapped in
-    a header tag (<h1-6>) and the body is just copied verbatim after the header.
+    a header tag (`<h1-6`>) and the body is just copied verbatim after the header.
     As a preprocessor is used, the Markdown text is simply inserted into the source
     document and then the entire document (with the newly inserted parts) is parsed and
     converted to HTML. We could take a few different approaches instead:
@@ -133,7 +133,7 @@ on potential future development:
        `<p>[% object.name %]</p>` and swap that out.
     
     2. A second alternative would be to use a blockprocessor and custom build the
-       HTML using etree right in the code. The Markdown doc strings could be parsed
+       HTML using `etree` right in the code. The Markdown doc strings could be parsed
        recursively and inserted as children in the tree. While this gives total 
        control and feels more in line with the spirit of the Markdown Extension API,
        it becomes difficult/impossible for users to customize the resulting markup.
@@ -143,7 +143,8 @@ on potential future development:
     which may not fit into the hierarchy of the rest of the page, this probably makes
     the most sense. In HTML5, each `<section>` can have its own header hierarchy and
     start over at `<h1>`. As long as the sections are given a reasonable styling hook,
-    themes can dial down the headers to match the hierarchy of the entire page, etc.
+    themes can dial down the headers styling to match the hierarchy of the entire page, 
+    etc.
     
     Either way, my inclination is to look at Sphinx's markup and possibly copy it so
     that Sphinx CSS could be used out-of-the-box for styling purposes. That said,
@@ -151,7 +152,7 @@ on potential future development:
     Rest's directives to identify various pieces of the doc string. That being the 
     case, it might make more sense to take this in its own direction. If we copy
     an existing scheme, I'm inclined to go with (2) above and hardcode the output.
-    But if we do out own thing, I think (1) makes more sense to give users the 
+    But if we do our own thing, I think (1) makes more sense to give users the 
     flexability to change the output to fit their needs.
 
 *   Or we could completely ignore the previous point and simpley improve the existing
@@ -162,10 +163,11 @@ on potential future development:
     
     * The Markdown pulled from the doc strings needs to have whitespace normalization.
     
-    * A option could be added to the DocTag to allow the document author to define the
+    * An option could be added to the DocTag to allow the document author to define the
     lowest level header so the output fits into the document's hierarchy. Not sure
-    what this would look like.
-
+    what this would look like. Not sure I like `[% object.name 3 %]`. Maybe 
+    `[% object.name|level:3 %]` or `[% object.name level=3 %]` or 
+    `[% object=object.name, level=3 %]`... Uhg.
 
 Why?
 ----

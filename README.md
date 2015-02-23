@@ -88,6 +88,85 @@ Or, from the command line:
 
     $ python -m markdown -x mddoc -x markdown.extensions.attr_list input.txt > output.html
 
+Roadmap
+-------
+
+In its current status, this project is more of an experimental proof-of-concept than 
+something I would use in a production environment. While I don't have a concrete
+roadmap in mind, there are a few possible ways it could go. Here are my thoughts 
+on potential future development:
+
+*   Tests: Obviously, tests need to be created before any further development is done.
+    I expect this includes creating some sort of mock modules/classes/functions with
+    doc strings that the tests can be run against.
+
+*   The format and syntax of the DocTag is not set in stone at this point. I'm not
+    sure I even like it. I was inclined to go with curly brackets (`{}`), but I know
+    that a number of poeple run their Markdown through Django or Jinga template
+    systems and this would conflict with that. And angled brackets (`<>`) are easily
+    confused with raw HTML, which could trip up browsers when using nonsupporting 
+    Markdown parsers. The square brackets (`[]`) feel a little overloaded in Markdown 
+    as it is, but is seemed to make sense at the time. Besides, they should go through
+    nonsupporting Markdown parsers unaffected in the current format and won't confuse
+    browers in their raw state in an HTML document.
+
+    I went with percentage signs (`[% ... %]`) which is reminisant of Django/Jinga's
+    block tags (`{% ... %}`). I could have went with double square brackets 
+    (`[[ ... ]]`), but that is already used by the WikiLinks Extension, and is more
+    akin to Django/Jinga's tags (`{{ ... }}`), which are not block level. I wanted to 
+    convey that this can only be used at the block level and I thought that perhaps
+    a similar syntax would help.
+
+*   No consideration for theming has been given. The markup produced may need to be
+    adjusted to better accommodate such considerations.
+
+    There are a few possible ways to address that. Currently, the title is wrapped in
+    a header tag (<h1-6>) and the body is just copied verbatim after the header.
+    As a preprocessor is used, the Markdown text is simply inserted into the source
+    document and then the entire document (with the newly inserted parts) is parsed and
+    converted to HTML. We could take a few different approaches instead:
+    
+    1. A templating system could be used allowing the user to more easily adapt the
+       output to their specific theming needs. However, this would require that
+       already converted HTML would need to be inserted into the document; probably
+       by a postprocessor. In this scenario, the regex would look for
+       `<p>[% object.name %]</p>` and swap that out.
+    
+    2. A second alternative would be to use a blockprocessor and custom build the
+       HTML using etree right in the code. The Markdown doc strings could be parsed
+       recursively and inserted as children in the tree. While this gives total 
+       control and feels more in line with the spirit of the Markdown Extension API,
+       it becomes difficult/impossible for users to customize the resulting markup.
+    
+    Both of the above paths would allow for the inserted excerpts to be wrapped in
+    some way (possibly by a `<div>` or `<section>`). As the output includes headers
+    which may not fit into the hierarchy of the rest of the page, this probably makes
+    the most sense. In HTML5, each `<section>` can have its own header hierarchy and
+    start over at `<h1>`. As long as the sections are given a reasonable styling hook,
+    themes can dial down the headers to match the hierarchy of the entire page, etc.
+    
+    Either way, my inclination is to look at Sphinx's markup and possibly copy it so
+    that Sphinx CSS could be used out-of-the-box for styling purposes. That said,
+    the Markdown parts of the doc strings may not translate so well as we don't have
+    Rest's directives to identify various pieces of the doc string. That being the 
+    case, it might make more sense to take this in its own direction. If we copy
+    an existing scheme, I'm inclined to go with (2) above and hardcode the output.
+    But if we do out own thing, I think (1) makes more sense to give users the 
+    flexability to change the output to fit their needs.
+
+*   Or we could completely ignore the previous point and simpley improve the existing
+    method. A few things would need to happen:
+
+    * The markup inserted by the preprocessor needs to be broken up and integrated 
+    into the list of lines so the rest of the preprocessors can operate on it properly.
+    
+    * The Markdown pulled from the doc strings needs to have whitespace normalization.
+    
+    * A option could be added to the DocTag to allow the document author to define the
+    lowest level header so the output fits into the document's hierarchy. Not sure
+    what this would look like.
+
+
 Why?
 ----
 

@@ -261,10 +261,10 @@ class MdDoc(pydoc.TextDoc):
                     note = ' from ' + pydoc.classname(imclass, mod)
             else:
                 if object.im_self is not None:
-                    note = ' method of %s instance' % classname(
+                    note = ' method of %s instance' % pydoc.classname(
                         object.im_self.__class__, mod)
                 else:
-                    note = ' unbound %s method' % classname(imclass,mod)
+                    note = ' unbound %s method' % pydoc.classname(imclass,mod)
             object = object.im_func
 
         if name == realname:

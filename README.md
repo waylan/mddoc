@@ -100,23 +100,23 @@ on potential future development:
     I expect this includes creating some sort of mock modules/classes/functions with
     doc strings that the tests can be run against.
 
-    As an aside, the existing implementation simply sudclasses pydoc, removes some
+    As an aside, the existing implementation simply subclasses pydoc, removes some
     unneeded features and alters object nesting and object titles to fix Markdown's
-    syntax. It was suprising how quickly I got it working. ALthough, I'm sure there 
+    syntax. It was surprising how quickly I got it working. Although, I'm sure there 
     are multiple edge cases I didn't account for. Comprehensive tests will likely
     reveal all sorts of issues.
 
 *   The format and syntax of the DocTag is not set in stone at this point. I'm not
     sure I even like it. I was inclined to go with curly brackets (`{}`), but I know
-    that a number of poeple run their Markdown through Django or Jinga template
+    that a number of people run their Markdown through Django or Jinga template
     systems and this would conflict with that. And angled brackets (`<>`) are easily
     confused with raw HTML, which could trip up browsers when using nonsupporting 
     Markdown parsers. The square brackets (`[]`) feel a little overloaded in Markdown 
     as it is, but is seemed to make sense at the time. Besides, they should go through
     nonsupporting Markdown parsers unaffected in the current format and won't confuse
-    browers in their raw state in an HTML document.
+    browsers in their raw state in an HTML document.
 
-    I went with percent signs (`[% ... %]`) which is reminisant of Django/Jinga's
+    I went with percent signs (`[% ... %]`) which is reminiscent of Django/Jinga's
     block tags (`{% ... %}`). I could have went with double square brackets 
     (`[[ ... ]]`), but that is already used by the WikiLinks Extension, and is more
     akin to Django/Jinga's tags (`{{ ... }}`), which are not block level. I wanted to 
@@ -157,30 +157,30 @@ on potential future development:
     the Markdown parts of the doc strings may not translate so well as we don't have
     Rest's directives to identify various pieces of the doc string. That being the 
     case, it might make more sense to take this in its own direction. If we copy
-    an existing scheme, I'm inclined to go with (2) above and hardcode the output.
+    an existing scheme, I'm inclined to go with (2) above and hard-code the output.
     But if we do our own thing, I think (1) makes more sense to give users the 
-    flexability to change the output to fit their needs.
+    flexibility to change the output to fit their needs.
 
     Either option would probably need to complete revamp of the doc string extracting 
     code. The existing method relies heavily on Pydoc's text based method (used for
     displaying documentation on the command line as plain text). That works good for
-    building a Markdown document which still needs parsered to HTML, but not so well
+    building a Markdown document which still needs parsed to HTML, but not so well
     for building HTML. Pydoc's own HTML method is much more complex (and not so easily
     portable).
 
-*   Or we could completely ignore the previous point and simpley improve the existing
+*   Or we could completely ignore the previous point and simply improve the existing
     method. A few things would need to happen:
 
     * The markup inserted by the preprocessor needs to be broken up and integrated 
     into the list of lines so the rest of the preprocessors can operate on it properly.
 
-    * The Markdown pulled from the doc strings needs to have whitespace normalization.
+    * The Markdown pulled from the doc strings needs to have white-space normalization.
 
     * An option could be added to the DocTag to allow the document author to define the
     lowest level header so the output fits into the document's hierarchy. Not sure
     what this would look like. Not sure I like `[% object.name 3 %]`. Maybe 
     `[% object.name|level:3 %]` or `[% object.name level=3 %]` or 
-    `[% object=object.name, level=3 %]`... Uhg.
+    `[% object=object.name, level=3 %]`... Ugh.
 
 Why?
 ----
@@ -188,7 +188,7 @@ Why?
 While there are various tools out there to automatically generate documentation from
 source code, I wanted something light-weight that could easily be incorporated into
 various other tools.  Additionally, I have never been fond of tools which create an
-entire website automagically from source code. I believe that the best documentation
+entire website auto-magically from source code. I believe that the best documentation
 is hand-crafted prose. However, when the same documentation is duplicated in the
 source code and in the documentation for a project, they can diverge over time.
 And it is not very DRY to have to edit the documentation in two locations.

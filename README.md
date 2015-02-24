@@ -106,8 +106,8 @@ on potential future development:
     are multiple edge cases I didn't account for. Comprehensive tests will likely
     reveal all sorts of issues.
 
-*   The format and syntax of the DocTag is not set in stone at this point. I'm not
-    sure I even like it. I was inclined to go with curly brackets (`{}`), but I know
+*   The format and syntax of the DocTag is not set in stone at this point. <del>I'm not
+    sure I even like it.</del> I was inclined to go with curly brackets (`{}`), but I know
     that a number of people run their Markdown through Django or Jinga template
     systems and this would conflict with that. And angled brackets (`<>`) are easily
     confused with raw HTML, which could trip up browsers when using nonsupporting 
@@ -126,62 +126,42 @@ on potential future development:
 *   No consideration for theming has been given. The markup produced may need to be
     adjusted to better accommodate such considerations.
 
-    There are a few possible ways to address that. Currently, the title is wrapped in
-    a header tag (`<h1-6`>) and the body is just copied verbatim after the header.
-    As a preprocessor is used, the Markdown text is simply inserted into the source
-    document and then the entire document (with the newly inserted parts) is parsed and
-    converted to HTML. We could take a few different approaches instead:
+    Currently, the title is wrapped in a header tag (`<h1-6`>) and the body is just
+    copied verbatim after the header. As a preprocessor is used, the Markdown text
+    is simply inserted into the source document and then the entire document (with
+    the newly inserted parts) is parsed and converted to HTML. 
 
-    1. A templating system could be used allowing the user to more easily adapt the
-       output to their specific theming needs. However, this would require that
-       already converted HTML would need to be inserted into the document; probably
-       by a postprocessor. In this scenario, the regex would look for
-       `<p>[% object.name %]</p>` and swap that out.
+    Things should be simplified even more. For example, one tag would insert the
+    signature of a function/class/method and a separate tag would insert the doc
+    string. Perhaps something like this:
+    
+        # [$ object.name $]
+        
+        [% object.name %]
 
-    2. A second alternative would be to use a blockprocessor and custom build the
-       HTML using `etree` right in the code. The Markdown doc strings could be parsed
-       recursively and inserted as children in the tree. While this gives total 
-       control and feels more in line with the spirit of the Markdown Extension API,
-       it becomes difficult/impossible for users to customize the resulting markup.
+    However, for this to work, the doc tag would need to be implemented as a
+    blockprocessor and the sig tag as an inline pattern. In fact they could be two
+    different tags.
 
-    Both of the above paths would allow for the inserted excerpts to be wrapped in
-    some way (possibly by a `<div>` or `<section>`). As the output includes headers
-    which may not fit into the hierarchy of the rest of the page, this probably makes
-    the most sense. In HTML5, each `<section>` can have its own header hierarchy and
-    start over at `<h1>`. As long as the sections are given a reasonable styling hook,
-    themes can dial down the headers styling to match the hierarchy of the entire page, 
-    etc.
+    Note that in this scenario, the document author has to mark up the parts of the
+    document. For example, the header is explicitly defined by the document author.
+    Therefore, the document author has full control and could forgo headers
+    altogether. For example, she could use definition lists (and define her own attr
+    list):
 
-    Either way, my inclination is to look at Sphinx's markup and possibly copy it so
-    that Sphinx CSS could be used out-of-the-box for styling purposes. That said,
-    the Markdown parts of the doc strings may not translate so well as we don't have
-    Rest's directives to identify various pieces of the doc string. That being the 
-    case, it might make more sense to take this in its own direction. If we copy
-    an existing scheme, I'm inclined to go with (2) above and hard-code the output.
-    But if we do our own thing, I think (1) makes more sense to give users the 
-    flexibility to change the output to fit their needs.
-
-    Either option would probably need to complete revamp of the doc string extracting 
-    code. The existing method relies heavily on Pydoc's text based method (used for
-    displaying documentation on the command line as plain text). That works good for
-    building a Markdown document which still needs parsed to HTML, but not so well
-    for building HTML. Pydoc's own HTML method is much more complex (and not so easily
-    portable).
-
-*   Or we could completely ignore the previous point and simply improve the existing
-    method. A few things would need to happen:
-
-    * The markup inserted by the preprocessor needs to be broken up and integrated 
-    into the list of lines so the rest of the preprocessors can operate on it properly.
-
-    * The Markdown pulled from the doc strings needs to have white-space normalization.
-
-    * An option could be added to the DocTag to allow the document author to define the
-    lowest level header so the output fits into the document's hierarchy. Not sure
-    what this would look like. Not sure I like `[% object.name 3 %]`. Maybe 
-    `[% object.name|level:3 %]` or `[% object.name level=3 %]` or 
-    `[% object=object.name, level=3 %]`... Ugh.
-
+        [$ object.name $]{ #object.name .function }
+        :   [% object.name %]
+    
+    Classes would only output the doc string for the doc tag. And modules would
+    return a synopsis for the sig tag and the  doc string (minus the first line
+    if it stands alone (the synopsis)) for the doc tag. The various parts of the
+    class/module would need to be added manually -- which is a reduction in functionality
+    from what exists now.
+    
+    Some different proposals were previously described here and have been rejected
+    and not fitting in this the goals of this project. If you are interested you can
+    check them out in the commit history.
+    
 Why?
 ----
 
